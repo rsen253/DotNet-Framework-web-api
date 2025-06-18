@@ -1,1 +1,41 @@
-https://localhost:44304/api/books
+@hostname = https://localhost:44304
+
+### Get all books
+GET {{hostname}}/api/books
+
+
+### Get book by ID
+GET {{hostname}}/api/books/1
+
+### Create a new book
+POST {{hostname}}/api/books
+Content-Type: application/json
+{
+  "bookId" : 3,
+  "title": "Test book",
+  "description": "hsafjsahfs fdlsahfd",
+  "price": 99.99,
+  "author": "Rahul",
+  "category": "Science"
+}
+
+### Search books by title
+GET {{hostname}}/api/books/search?title=one
+Accept: application/json
+
+### Update an existing book
+PUT {{hostname}}/api/books/3
+Content-Type: application/json
+
+{
+  "title": "Test book - update",
+  "description": "hsafjsahfs fdlsahfd",
+  "price": 99.99,
+  "author": "Robert C. Martin",
+  "category": "Programming"
+}
+
+
+### Delete a book
+DELETE {{hostname}}/api/books/3
+Accept: application/json

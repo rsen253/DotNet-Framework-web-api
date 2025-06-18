@@ -1,52 +1,83 @@
 ﻿using Sample.API.Models;
+using Sample.API.Services;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Web.Http;
 
 namespace Sample.API.Controllers
 {
+    [RoutePrefix("api/books")]
     public class BooksController : ApiController
     {
-        [HttpGet]
-        public IHttpActionResult Rahul()
+        private readonly IBookService _bookService;
+        public BooksController()
         {
-            var response = new ResponseDto
-            {
-                BookId = 1,
-                Title = "Sample book",
-                Description = "Description",
-                Authors = new List<Author> {
-                    new Author {
-                        AuthorId = 1,
-                        FirstName = "Rahul",
-                        LastName = "Sen",
-                        Email = "rsen253@gmail.com",
-                        DOB = new DateTime(1980,01,01)
-                    },
-                    new Author {
-                        AuthorId = 2,
-                        FirstName = "Rahul2",
-                        LastName = "Sen2",
-                        Email = "rsen2523@gmail.com",
-                        DOB = new DateTime(1980,01,01)
-                    }
-                },
-                Tags = new List<Tags>
-                {
-                    new Tags
-                    {
-                        Name = "Test1",
-                        TagId = 1,
-                    },
-                    new Tags
-                    {
-                        Name = "Test2",
-                        TagId = 2,
-                    }
-                }
-            };
+            _bookService = new BookService();
 
-            return Ok(response);
+        }
+
+        //[HttpGet, Route("")]
+        [HttpGet]
+        public IHttpActionResult GetAllBooks()
+        {
+            var books = _bookService.GetAll();
+            return Ok(books);
+        }
+
+        //[HttpGet, Route("{id:int}")]
+        [HttpGet]
+        [Route("{id:int}")]
+        public IHttpActionResult GetBookId(int id)
+        {
+            var books = _bookService.GetBookById(id);
+            if (books == null)
+            {
+                return NotFound();
+            }
+            return Ok(books);
+        }
+
+        [HttpPost]
+        public IHttpActionResult CreateBook(Book book)
+        {
+            _bookService.Create(book);
+            return Created($"mfsi/books/{book.BookId}", book);
+        }
+
+        [HttpGet]
+        [Route("search")]
+        public IHttpActionResult Search(string title)
+        {
+            var results = _bookService.SearchByTitle(title);
+            return Ok(results);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        public IHttpActionResult Update(int id, [FromBody] Book book)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existing = _bookService.GetBookById(id);
+            if (existing == null)
+                return NotFound();
+
+            _bookService.Update(id, book);
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        public IHttpActionResult Delete(int id)
+        {
+            var book = _bookService.GetBookById(id);
+            if (book == null)
+                return NotFound();
+
+            _bookService.Delete(id);
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }
